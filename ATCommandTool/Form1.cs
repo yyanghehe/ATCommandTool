@@ -31,8 +31,7 @@ namespace ATCommandTool
             lstBoxRe.KeyDown += LstBoxRe_KeyDown;
             lstBoxRe.DoubleClick += LstBoxRe_DoubleClick;
         }
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetForegroundWindow();
+
        
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -436,12 +435,19 @@ namespace ATCommandTool
         {
             setListFromLocation();
         }
-
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetForegroundWindow();
         private void Form1_Deactivate(object sender, EventArgs e)
         {
-            if (lstboxIsShow) {
+            IntPtr OmyPtr = GetForegroundWindow();
+            Console.WriteLine("Form5的窗体句柄" + Form5.myPtr.ToInt32());
+            Console.WriteLine("现在激活的窗体句柄" + OmyPtr.ToInt32());
+            //判断应用程序的状态
+            if (lstboxIsShow&&(Form5.myPtr.ToInt32()!=OmyPtr.ToInt32())) {
                 form5.Hide();
                 lstboxIsShow = false;
+                Console.WriteLine("HIDE");
+                
             }
             //lstboxIsShow = false;
         }
