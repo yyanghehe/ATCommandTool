@@ -153,18 +153,24 @@ namespace ATCommandTool.Controlers
                     Application.DoEvents();
                     step++;
                     int i = 0;
+                    int j = 0;
                     foreach (ATCommand atcommand in atCommands)
                     {
+                        if (rbSel.Checked && atcommand.HEX)
+                        {
+                            j += 1;
+                        }
                         if (atcommand.Command == null || atcommand.Command.Equals(""))
                         {
                             i+=1;
-                            if (i == atCommands.Count) {
+                            if (i == atCommands.Count||(j==0&& rbSel.Checked)) {
                                 cboxMCCircle.Checked = false;
                                 putTimesVisable(true);
                                 return;
                             }
                             continue;
                         }
+                        
                         //执行到指定次数,退出!!!
                         if (step > times && times != 0)
                         {

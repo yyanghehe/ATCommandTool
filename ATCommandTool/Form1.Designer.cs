@@ -83,6 +83,7 @@
             this.RightClik_A = new System.Windows.Forms.ToolStripMenuItem();
             this.RightClik_V = new System.Windows.Forms.ToolStripMenuItem();
             this.RightClik_D = new System.Windows.Forms.ToolStripMenuItem();
+            this.RightClik_S = new System.Windows.Forms.ToolStripMenuItem();
             this.fileSystemWatcher1 = new System.IO.FileSystemWatcher();
             this.gboxMCCS.SuspendLayout();
             this.gboxMCPD.SuspendLayout();
@@ -614,9 +615,10 @@
             this.RightClik_C,
             this.RightClik_A,
             this.RightClik_V,
-            this.RightClik_D});
+            this.RightClik_D,
+            this.RightClik_S});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(147, 92);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(147, 114);
             this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
             // 
             // RightClik_C
@@ -647,6 +649,13 @@
             this.RightClik_D.Text = "清空(Ctrl+D)";
             this.RightClik_D.Click += new System.EventHandler(this.RightClik_D_Click);
             // 
+            // RightClik_S
+            // 
+            this.RightClik_S.Name = "RightClik_S";
+            this.RightClik_S.Size = new System.Drawing.Size(146, 22);
+            this.RightClik_S.Text = "保存(Ctrl+S)";
+            this.RightClik_S.Click += new System.EventHandler(this.RightClik_S_Click);
+            // 
             // fileSystemWatcher1
             // 
             this.fileSystemWatcher1.EnableRaisingEvents = true;
@@ -665,7 +674,7 @@
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "串口工具V2.6.4";
+            this.Text = "串口工具V2.8_Test";
             this.Deactivate += new System.EventHandler(this.Form1_Deactivate);
             this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Form1_KeyPress);
             this.Move += new System.EventHandler(this.Form1_Move);
@@ -744,6 +753,7 @@
         private System.Windows.Forms.ToolStripMenuItem RightClik_V;
         private System.Windows.Forms.CheckBox cboxShowTime;
         private System.Windows.Forms.ToolStripMenuItem RightClik_D;
+        private System.Windows.Forms.ToolStripMenuItem RightClik_S;
     }
 }
 

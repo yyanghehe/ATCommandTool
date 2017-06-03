@@ -49,7 +49,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>AtCommandTool.ico</ApplicationIcon>
+    <ApplicationIcon>moiletek.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -159,6 +159,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AtCommandTool.ico" />
+    <Content Include="moiletek.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -3,6 +3,7 @@ using ATCommandTool.Controlers;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -32,7 +33,7 @@ namespace ATCommandTool
             lstBoxRe.DoubleClick += LstBoxRe_DoubleClick;
         }
 
-       
+
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -85,7 +86,7 @@ namespace ATCommandTool
         public void makeAdd(string str, addTo doAdd)
         {
             if (str.EndsWith("\r\n"))
-                str=str.Replace("\r\n", "");
+                str = str.Replace("\r\n", "");
             doAdd(str);
         }
         public delegate void addTo(string str);
@@ -94,11 +95,15 @@ namespace ATCommandTool
         {
             if (atTemp.Count >= maxTemp)
                 atTemp.RemoveAt(0);
-            if (atTemp.Contains(str)) {
+            if (atTemp.Contains(str))
+            {
                 atTemp.RemoveAt(atTemp.IndexOf(str));
             }
             atTemp.Add(str);
         }
+        /// <summary>
+        /// 发送成功的AT指令
+        /// </summary>
         public static List<string> atTemp = new List<string> { };
         static int maxTemp = 10000;
         /// <summary>
@@ -246,6 +251,12 @@ namespace ATCommandTool
                 RightClik_D_Click(sender, e);
                 e.Handled = true;
             }
+            //CTRL+S
+            if (e.KeyChar == 19)
+            {
+                RightClik_S_Click(sender, e);
+                e.Handled = true;
+            }
             if (!e.Handled)
             {
                 portControl.portSend(Encoding.Default.GetString(Encoding.Default.GetBytes(new char[] { e.KeyChar })), false);
@@ -294,18 +305,29 @@ namespace ATCommandTool
                 portControl.portSend(text, false);
             }
         }
-
+        /// <summary>
+        /// 对右键的全选,保存,清空按钮的可操作判断
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void contextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (tboxShow.Text == "")
+            int lblS_int = int.Parse(lblS.Text.Substring(2));
+            int lblT_int = int.Parse(lblT.Text.Substring(2));
+            int lblR_int = int.Parse(lblR.Text.Substring(2));
+            int all = lblS_int + lblT_int + lblR_int;
+            if (tboxShow.Text.Length == 0 && all == 0)
             {
+
                 RightClik_A.Enabled = false;
                 RightClik_D.Enabled = false;
+                RightClik_S.Enabled = false;
             }
             else
             {
                 RightClik_A.Enabled = true;
                 RightClik_D.Enabled = true;
+                RightClik_S.Enabled = true;
             }
         }
 
@@ -336,6 +358,12 @@ namespace ATCommandTool
                 RightClik_D_Click(sender, e);
                 e.Handled = true;
             }
+            //CTRL+S
+            if (e.KeyChar == 19)
+            {
+                RightClik_S_Click(sender, e);
+                e.Handled = true;
+            }
         }
         private void LstBoxRe_DoubleClick(object sender, EventArgs e)
         {
@@ -358,8 +386,9 @@ namespace ATCommandTool
                     tboxSend.Focus();
                     tboxSend.SelectionStart = tboxSend.Text.Length;
                 }
+                e.Handled = true;
             }
-            if(keys == Keys.Back)
+            if (keys == Keys.Back)
             {
                 if (lstBoxRe.SelectedItem != null)
                 {
@@ -367,6 +396,22 @@ namespace ATCommandTool
                     tboxSend.Focus();
                     tboxSend.SelectionStart = tboxSend.Text.Length;
                 }
+                e.Handled = true;
+            }
+            if (keys == Keys.Delete)
+            {
+                if (lstBoxRe.SelectedItem != null)
+                {
+                    atTemp.Remove(lstBoxRe.SelectedItem.ToString());
+                    lstBoxRe.Items.Remove(lstBoxRe.SelectedItem.ToString());
+                    lstBoxRe.Height -= lstBoxRe.ItemHeight;
+                    form5.Height -= lstBoxRe.ItemHeight;
+                    if (lstBoxRe.Items.Count == 0)
+                    {
+                        form5.Hide();
+                    }
+                }
+                //atTemp.ToString();
             }
         }
 
@@ -404,7 +449,7 @@ namespace ATCommandTool
                     form5.listBox1.Height = 30;
                 }
                 else
-                    form5.listBox1.Height = (form5.listBox1.Font.Height) * (form5.listBox1.Items.Count)+3;
+                    form5.listBox1.Height = (form5.listBox1.Font.Height) * (form5.listBox1.Items.Count) + 3;
                 setListFromLocation();
                 form5.Show();
                 lstboxIsShow = true;
@@ -416,10 +461,13 @@ namespace ATCommandTool
                 lstboxIsShow = false;
             }
         }
+        /// <summary>
+        /// 命令提示窗口的位置设置
+        /// </summary>
         private void setListFromLocation()
         {
-            Point point = new Point(tboxSend.Location.X+tboxSend.Parent.Location.X + this.Location.X + 10,
-                tboxSend.Location.Y + gboxSend.Location.Y+ gboxPort.Location.Y +371 + this.Location.Y + 50);
+            Point point = new Point(tboxSend.Location.X + tboxSend.Parent.Location.X + this.Location.X + 10,
+                tboxSend.Location.Y + gboxSend.Location.Y + gboxPort.Location.Y + 371 + this.Location.Y + 50);
             System.Drawing.Rectangle rec = Screen.GetWorkingArea(this);
             int SH = rec.Height;
             int SW = rec.Width;
@@ -428,7 +476,7 @@ namespace ATCommandTool
                 point.Y = point.Y - form5.Height - 30;
             }
             form5.Location = point;
-            form5.Height = form5.listBox1.ItemHeight* form5.listBox1.Items.Count+6;
+            form5.Height = form5.listBox1.ItemHeight * form5.listBox1.Items.Count + 6;
             form5.Width = tboxSend.Width;
         }
         private void Form1_Move(object sender, EventArgs e)
@@ -437,17 +485,23 @@ namespace ATCommandTool
         }
         [DllImport("user32.dll")]
         private static extern IntPtr GetForegroundWindow();
+        /// <summary>
+        /// 主窗口被激活
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Form1_Deactivate(object sender, EventArgs e)
         {
             IntPtr OmyPtr = GetForegroundWindow();
             Console.WriteLine("Form5的窗体句柄" + Form5.myPtr.ToInt32());
             Console.WriteLine("现在激活的窗体句柄" + OmyPtr.ToInt32());
             //判断应用程序的状态
-            if (lstboxIsShow&&(Form5.myPtr.ToInt32()!=OmyPtr.ToInt32())) {
+            if (lstboxIsShow && (Form5.myPtr.ToInt32() != OmyPtr.ToInt32()))
+            {
                 form5.Hide();
                 lstboxIsShow = false;
                 Console.WriteLine("HIDE");
-                
+
             }
             //lstboxIsShow = false;
         }
@@ -455,12 +509,48 @@ namespace ATCommandTool
         private void Form1_Activated(object sender, EventArgs e)
         {
         }
-
+        /// <summary>
+        /// 发送AT指令
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void tboxSend_MouseClick(object sender, MouseEventArgs e)
         {
             tboxSend_TextChanged(sender, e);
         }
 
+        /// <summary>
+        /// 保存ATlog
+        /// </summary>
+        private void saveAtLog()
+        {
+            //获取当前文件路径
+            if (tboxShow.Text.Length > 0)
+            {
+                string nowDirPath = System.Windows.Forms.Application.StartupPath;
+                string dirPath = nowDirPath + "\\AtCommandTool_Logs";
+                string filePth = dirPath + "\\" + DateTime.Now.ToString("yyyyMMddhhmmmmssfff") + ".log";
+                if (!Directory.Exists(dirPath))
+                {
+                    Directory.CreateDirectory(dirPath);
+                }
+                if (!File.Exists(filePth))
+                {
+                    using (File.Create(filePth))
+                    {
+
+                    }
+                }
+                File.WriteAllText(filePth, tboxShow.Text);
+                MessageBox.Show("log已保存到:\r\n" + filePth);
+            }
+            else { return; }
+        }
+
+        private void RightClik_S_Click(object sender, EventArgs e)
+        {
+            saveAtLog();
+        }
 
 
         /* 判断设备是否连接

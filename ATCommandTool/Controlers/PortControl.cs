@@ -82,7 +82,7 @@ namespace ATCommandTool.Controlers
             //Console.WriteLine("串口" + serialPort.PortName);
             //Console.WriteLine("资源销毁中....");
         }
-
+        Thread myThread;
         public void OpenPort()
         {
             Application.DoEvents();
@@ -102,15 +102,16 @@ namespace ATCommandTool.Controlers
             serialPort.Parity = Parity.None;//校验位
             serialPort.StopBits = StopBits.One;//停止位
             serialPort.WriteTimeout = -1;
-            serialPort.ReadTimeout = 20000;
-            serialPort.ReadBufferSize = 2048;
+            serialPort.ReadTimeout = -1;
+            serialPort.ReadBufferSize = 4096;
             serialPort.WriteBufferSize = 2048;
 
             serialPort.ReceivedBytesThreshold = 1;//必须设置,否者不能接收到返回的数据
             serialPort.DtrEnable = cboxDTR.Checked; //设置电脑收到回显
             serialPort.RtsEnable = cboxRTS.Checked; //设置电脑收到回显
             serialPort.NewLine = "\r\n";
-
+            myThread = new Thread(waitThread);
+            myThread.Start();
             //打开串口并更改按钮
             try
             {
@@ -142,12 +143,14 @@ namespace ATCommandTool.Controlers
         }
         private void CboxDTR_Click(object sender, EventArgs e)
         {
-            serialPort.DtrEnable = (sender as CheckBox).Checked;
+            if (serialPort != null)
+                serialPort.DtrEnable = (sender as CheckBox).Checked;
         }
 
         private void CboxRTS_Click(object sender, EventArgs e)
         {
-            serialPort.RtsEnable = (sender as CheckBox).Checked;
+            if (serialPort != null)
+                serialPort.RtsEnable = (sender as CheckBox).Checked;
         }
 
         public void closePort()
@@ -168,18 +171,29 @@ namespace ATCommandTool.Controlers
                 showERROR(e.Message);
             }
         }
+        AutoResetEvent myEvent = new AutoResetEvent(false);
         private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
+            myEvent.WaitOne();
             int count = serialPort.BytesToRead;
             if (count > 0)
             {
-                Console.WriteLine("GETLENGTH:"+count);
                 byte[] bufferBytes = new byte[count];
                 serialPort.Read(bufferBytes, 0, count);
                 PortBytes portBytes = new PortBytes(showTotBox);
                 tBoxPortOut.FindForm().BeginInvoke(portBytes, bufferBytes);
                 //Thread showThread = new Thread(new ParameterizedThreadStart(dobufferBytes));
                 //showThread.Start(bufferBytes);
+            }
+        }
+
+        void waitThread()
+        {
+            while (true)
+            {
+                Application.DoEvents();
+                Thread.Sleep(200);
+                myEvent.Set();
             }
         }
         private void dobufferBytes(object obj)
@@ -196,16 +210,19 @@ namespace ATCommandTool.Controlers
             //{
             //    PortBytes goShow = new PortBytes(show);
             //    tBoxPortOut.FindForm().BeginInvoke(goShow, bytes);
+            Console.WriteLine(bytes.Length);
             if (showTime)
             {
                 tBoxPortOut.AppendText("\r\n" + NowTime() + "收<===\r\n");
             }
             show(bytes);
+            //show(bufferBytes);
             //});
         }
+
         private void show(byte[] bytes)
         {
-            Console.WriteLine("SHOW_LENGTH:" + bytes.Length);
+            //Console.WriteLine("SHOW_LENGTH:" + bytes.Length);
             if (showHEXReceive)
             {
                 byte[] HEXbytes = bytes;
@@ -218,14 +235,26 @@ namespace ATCommandTool.Controlers
             else
             {
                 string str = Encoding.Default.GetString(bytes).Replace("\0", "\\0");
-                Console.WriteLine("APPEND_STRING_LENGTH:" + str.Length+"\r\n"+str);
-                for (int i = 0; i <= str.Length / 1024; i++)
-                {
-                    if ((i + 1) * 1000 <= str.Length)
-                        tBoxPortOut.AppendText(str.Substring(i * 1000, 1000));
-                    else
-                        tBoxPortOut.AppendText(str.Substring(i * 1000, str.Length - i * 1000));
-                }
+                //Console.WriteLine("APPEND_STRING_LENGTH:" + str.Length+"\r\n"+str);
+                //for (int i = 0; i <= str.Length / 1024; i++)
+                //{
+                //    if ((i + 1) * 1000 <= str.Length)
+                //        tBoxPortOut.AppendText(str.Substring(i * 1000, 1000));
+                //    else
+                //        tBoxPortOut.AppendText(str.Substring(i * 1000, str.Length - i * 1000));
+                //}
+
+                StringBuilder sb = new StringBuilder(str);
+                //str_buffer += str;
+                //if (str_buffer.Length > 100000)
+                //{
+                //    Console.WriteLine("llllllllllllllllllllllllllll");
+                //    str_buffer = "";
+                //    tBoxPortOut.AppendText(sb.ToString());
+                //}
+                tBoxPortOut.AppendText(sb.ToString());
+                //tBoxPortOut.AppendText(sb.ToString());
+                //tBoxPortOut.AutoCompleteCustomSource.Add(str);
             }
             Label lblR = _gbox.FindForm().Controls.Find("lblR", true)[0] as Label;
             lblR.Text = "R:" + (int.Parse(lblR.Text.Substring(2)) + Encoding.Default.GetCharCount(bytes));
@@ -399,7 +428,7 @@ namespace ATCommandTool.Controlers
                 }
                 portSend(bytes);
                 Label lblS = _gbox.FindForm().Controls.Find("lblS", true)[0] as Label;
-                lblS.Text = "S:" + (int.Parse(lblS.Text.Substring(2)) + Encoding.Default.GetByteCount((str + serialPort.NewLine).ToCharArray()));
+                lblS.Text = "S:" + (int.Parse(lblS.Text.Substring(2)) + Encoding.Default.GetByteCount((str).ToCharArray()));
                 Label lblT = _gbox.FindForm().Controls.Find("lblT", true)[0] as Label;
                 lblT.Text = "T:" + (int.Parse(lblT.Text.Substring(2)) + 1);
             }
@@ -425,7 +454,7 @@ namespace ATCommandTool.Controlers
                 byte[] bytes = gb.GetBytes(str);
                 portSend(bytes);
                 Label lblS = _gbox.FindForm().Controls.Find("lblS", true)[0] as Label;
-                lblS.Text = "S:" + (int.Parse(lblS.Text.Substring(2)) + Encoding.Default.GetByteCount((str + serialPort.NewLine).ToCharArray()));
+                lblS.Text = "S:" + (int.Parse(lblS.Text.Substring(2)) + Encoding.Default.GetByteCount((str).ToCharArray()));
             }
         }
         public bool isOpen()
