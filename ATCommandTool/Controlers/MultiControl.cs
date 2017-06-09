@@ -156,14 +156,21 @@ namespace ATCommandTool.Controlers
                     int j = 0;
                     foreach (ATCommand atcommand in atCommands)
                     {
-                        if (rbSel.Checked && atcommand.HEX)
+                        if (rbSel.Checked )
                         {
-                            j += 1;
+                            if( atcommand.HEX)
+                                j += 1;
+                            if (atcommand.Index == atCommands.Count - 1&&j==0)
+                            {
+                                cboxMCCircle.Checked = false;
+                                putTimesVisable(true);
+                                return;
+                            }
                         }
                         if (atcommand.Command == null || atcommand.Command.Equals(""))
                         {
                             i+=1;
-                            if (i == atCommands.Count||(j==0&& rbSel.Checked)) {
+                            if (i == atCommands.Count) {
                                 cboxMCCircle.Checked = false;
                                 putTimesVisable(true);
                                 return;

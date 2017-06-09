@@ -103,15 +103,17 @@ namespace ATCommandTool.Controlers
             serialPort.StopBits = StopBits.One;//停止位
             serialPort.WriteTimeout = -1;
             serialPort.ReadTimeout = -1;
-            serialPort.ReadBufferSize = 4096;
-            serialPort.WriteBufferSize = 2048;
-
+            serialPort.ReadBufferSize = 5184;
+            serialPort.WriteBufferSize = 2592;
+            //serialPort.Handshake = Handshake.XOnXOff; //流控开关
             serialPort.ReceivedBytesThreshold = 1;//必须设置,否者不能接收到返回的数据
             serialPort.DtrEnable = cboxDTR.Checked; //设置电脑收到回显
             serialPort.RtsEnable = cboxRTS.Checked; //设置电脑收到回显
             serialPort.NewLine = "\r\n";
-            myThread = new Thread(waitThread);
+
+            myThread = new Thread(showToTBox);
             myThread.Start();
+            //ReceviceEvent.Set();
             //打开串口并更改按钮
             try
             {
@@ -170,95 +172,188 @@ namespace ATCommandTool.Controlers
             {
                 showERROR(e.Message);
             }
+            if (myThread != null)
+            {
+                //OutPutEvent.Dispose();
+                myThread.Abort();
+            }
+                
         }
-        AutoResetEvent myEvent = new AutoResetEvent(false);
+        AutoResetEvent OutPutEvent = new AutoResetEvent(false);
+        AutoResetEvent ReceviceEvent = new AutoResetEvent(false);
+        List<byte[]> listBytes=new List<byte[]>();
         private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            myEvent.WaitOne();
             int count = serialPort.BytesToRead;
             if (count > 0)
             {
+                try { 
+                //byte[] bufferBytes = new byte[count];
+                //serialPort.Read(bufferBytes, 0, count);
+                //PortBytes portBytes = new PortBytes(showTotBox);
+                //tBoxPortOut.FindForm().BeginInvoke(portBytes, bufferBytes);
+                countLength += count;
+                Console.WriteLine("count:" + count);
+                Console.WriteLine("CountLength:" + countLength);
                 byte[] bufferBytes = new byte[count];
                 serialPort.Read(bufferBytes, 0, count);
-                PortBytes portBytes = new PortBytes(showTotBox);
-                tBoxPortOut.FindForm().BeginInvoke(portBytes, bufferBytes);
-                //Thread showThread = new Thread(new ParameterizedThreadStart(dobufferBytes));
-                //showThread.Start(bufferBytes);
+                listBytes.Add(bufferBytes);
+                    //OutPutEvent.Set();
+                    //ReceviceEvent.Set();
+                    //Thread showThread = new Thread(new ParameterizedThreadStart(dobufferBytes));
+                    //showThread.Start(bufferBytes);
+                }
+                catch(Exception E)
+                {
+                    ERRORDelegate mySend = new ERRORDelegate(showERROR);
+                    _gbox.FindForm().BeginInvoke(mySend, E.Message);
+                }
             }
         }
-
+        double countLength = 0;
+        //private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        //{
+        //    int count = serialPort.BytesToRead;
+        //    if (count > 0)
+        //    {
+        //        countLength += count;
+        //        Console.WriteLine("byteCount:" + count);
+        //        Console.WriteLine("CountLength:" + countLength);
+        //        byte[] bufferBytes = new byte[count];
+        //        serialPort.Read(bufferBytes, 0, count);
+        //        //PortBytes portBytes = new PortBytes(showTotBox);
+        //        //tBoxPortOut.FindForm().BeginInvoke(portBytes, bufferBytes);
+        //        //Thread showThread = new Thread(new ParameterizedThreadStart(dobufferBytes));
+        //        //showThread.Start(bufferBytes);
+        //    }
+        //}
         void waitThread()
         {
             while (true)
             {
                 Application.DoEvents();
                 Thread.Sleep(200);
-                myEvent.Set();
+                OutPutEvent.Set();
             }
         }
-        private void dobufferBytes(object obj)
-        {
-            byte[] bytes = (byte[])obj;
-            PortBytes portBytes = new PortBytes(showTotBox);
-            tBoxPortOut.FindForm().BeginInvoke(portBytes, bytes);
-        }
+
         private delegate void PortBytes(byte[] bytes);
         private void showTotBox(byte[] bytes)
         {
-            //TaskFactory taskFactory = new TaskFactory();
-            //taskFactory.StartNew(() =>
-            //{
-            //    PortBytes goShow = new PortBytes(show);
-            //    tBoxPortOut.FindForm().BeginInvoke(goShow, bytes);
             Console.WriteLine(bytes.Length);
             if (showTime)
             {
                 tBoxPortOut.AppendText("\r\n" + NowTime() + "收<===\r\n");
             }
-            show(bytes);
-            //show(bufferBytes);
-            //});
-        }
 
+            show(bytes);
+        }
+        private void showToTBox()
+        {
+            while (true)
+            {
+                Application.DoEvents();
+                
+                if (listBytes.Count>0)
+                {
+                    PortBytes portBytes = new PortBytes(show);
+                    tBoxPortOut.FindForm().BeginInvoke(portBytes, listBytes[0]);
+                    OutPutEvent.WaitOne();
+                }
+                else
+                {
+                    continue;
+                }
+                
+            }
+        }
         private void show(byte[] bytes)
         {
             //Console.WriteLine("SHOW_LENGTH:" + bytes.Length);
+            string str = "";
             if (showHEXReceive)
             {
                 byte[] HEXbytes = bytes;
                 foreach (byte b in bytes)
                 {
-                    tBoxPortOut.AppendText(b.ToString("X2") + " ");
+                    str += b.ToString("X2") + " ";
                 }
-
+                
             }
             else
             {
-                string str = Encoding.Default.GetString(bytes).Replace("\0", "\\0");
-                //Console.WriteLine("APPEND_STRING_LENGTH:" + str.Length+"\r\n"+str);
-                //for (int i = 0; i <= str.Length / 1024; i++)
-                //{
-                //    if ((i + 1) * 1000 <= str.Length)
-                //        tBoxPortOut.AppendText(str.Substring(i * 1000, 1000));
-                //    else
-                //        tBoxPortOut.AppendText(str.Substring(i * 1000, str.Length - i * 1000));
-                //}
-
-                StringBuilder sb = new StringBuilder(str);
-                //str_buffer += str;
-                //if (str_buffer.Length > 100000)
-                //{
-                //    Console.WriteLine("llllllllllllllllllllllllllll");
-                //    str_buffer = "";
-                //    tBoxPortOut.AppendText(sb.ToString());
-                //}
-                tBoxPortOut.AppendText(sb.ToString());
-                //tBoxPortOut.AppendText(sb.ToString());
-                //tBoxPortOut.AutoCompleteCustomSource.Add(str);
+                str = Encoding.Default.GetString(bytes).Replace("\0", "\\0");
             }
-            Label lblR = _gbox.FindForm().Controls.Find("lblR", true)[0] as Label;
-            lblR.Text = "R:" + (int.Parse(lblR.Text.Substring(2)) + Encoding.Default.GetCharCount(bytes));
+            bytes = new byte[str.Length];
+            bytes=(Encoding.Default.GetBytes(str));
+            loopPrint(bytes);
+            //saveAtLog(Encoding.Default.GetString(bytes).Replace("\0", "\\0"));
+            listBytes.RemoveAt(0);
+            OutPutEvent.Set();
         }
+        private void saveAtLog(string str)
+        {
+            //获取当前文件路径
+            if (str.Length > 0)
+            {
+                string nowDirPath = System.Windows.Forms.Application.StartupPath;
+                string dirPath = nowDirPath + "\\AtCommandTool_Logs";
+                string filePth = dirPath + "\\" + DateTime.Now.ToString("XXXXXXX") + ".log";
+                if (!Directory.Exists(dirPath))
+                {
+                    Directory.CreateDirectory(dirPath);
+                }
+                if (!File.Exists(filePth))
+                {
+                    using (File.Create(filePth))
+                    {
+
+                    }
+                }
+                File.AppendAllText(filePth, str);
+                //MessageBox.Show("log已保存到:\r\n" + filePth);
+            }
+            else { return; }
+        }
+        void loopPrint(byte[] bytes)
+        {
+            if (showTime)
+            {
+                tBoxPortOut.AppendText("\r\n" + NowTime() + "收<===\r\n");
+            }
+            if (bytes.Length>=0)
+            {
+                if (bytes.Length > 1024)
+                {
+                    Console.WriteLine("长度大于1269=============此时长度为:" + bytes.Length);
+                    for (int i = 0; i <= bytes.Length / 1269; i++)
+                    {
+                        Application.DoEvents();
+                        byte[] temp;
+                        if (i != bytes.Length / 1269)
+                        {
+                            temp = new byte[1269];
+                            Array.Copy(bytes, i * 1269, temp,0, 1269);
+                        }
+                        else
+                        {
+                            temp = new byte[bytes.Length - i * 1269];
+                            Array.Copy(bytes, i * 1269, temp, 0, temp.Length);
+                        }
+                        tBoxPortOut.AppendText(Encoding.Default.GetString(temp));
+                        Label lblR = _gbox.FindForm().Controls.Find("lblR", true)[0] as Label;
+                        lblR.Text = "R:" + (int.Parse(lblR.Text.Substring(2)) + (!showHEXReceive ? temp.Length : temp.Length / 3));
+                    }
+                }
+                else
+                {
+                    tBoxPortOut.AppendText(Encoding.Default.GetString(bytes));
+                    Label lblR = _gbox.FindForm().Controls.Find("lblR", true)[0] as Label;
+                    lblR.Text = "R:" + (int.Parse(lblR.Text.Substring(2)) + (!showHEXReceive ? bytes.Length : bytes.Length / 3));
+                }
+            }
+        }
+
         private void showERROR(string str)
         {
             tBoxPortOut.AppendText(str);
@@ -337,7 +432,7 @@ namespace ATCommandTool.Controlers
             }
             cbboxBaud.Text = "115200";
         }
-        private delegate void mySend(string str);
+        private delegate void ERRORDelegate(string str);
         /// <summary>
         /// 发送数据
         /// </summary>
@@ -373,7 +468,7 @@ namespace ATCommandTool.Controlers
             }
             catch (Exception e)
             {
-                mySend mySend = new mySend(showERROR);
+                ERRORDelegate mySend = new ERRORDelegate(showERROR);
                 _gbox.FindForm().BeginInvoke(mySend, e.Message);
             }
         }
