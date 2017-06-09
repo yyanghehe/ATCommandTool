@@ -41,7 +41,6 @@ namespace ATCommandTool
             if (result == DialogResult.Yes)
             {
                 e.Cancel = false;
-                portControl.closePort();
                 this.Dispose();
                 this.Close();
             }
@@ -405,12 +404,11 @@ namespace ATCommandTool
                 {
                     atTemp.Remove(lstBoxRe.SelectedItem.ToString());
                     lstBoxRe.Items.Remove(lstBoxRe.SelectedItem.ToString());
-
-                    tboxSend_TextChanged(new object(), new EventArgs());
-                    if (lstBoxRe.Items.Count > 0)
+                    lstBoxRe.Height -= lstBoxRe.ItemHeight;
+                    form5.Height -= lstBoxRe.ItemHeight;
+                    if (lstBoxRe.Items.Count == 0)
                     {
-                        form5.listBox1.Focus();
-                        form5.listBox1.SelectedIndex = 0;
+                        form5.Hide();
                     }
                 }
                 //atTemp.ToString();
@@ -442,6 +440,7 @@ namespace ATCommandTool
                             form5.listBox1.Items.Add(atTemp[i]);
                     }
                 }
+
             }
             if (form5.listBox1.Items.Count > 0)
             {
@@ -494,14 +493,14 @@ namespace ATCommandTool
         private void Form1_Deactivate(object sender, EventArgs e)
         {
             IntPtr OmyPtr = GetForegroundWindow();
-            //Console.WriteLine("Form5的窗体句柄" + Form5.myPtr.ToInt32());
-            //Console.WriteLine("现在激活的窗体句柄" + OmyPtr.ToInt32());
+            Console.WriteLine("Form5的窗体句柄" + Form5.myPtr.ToInt32());
+            Console.WriteLine("现在激活的窗体句柄" + OmyPtr.ToInt32());
             //判断应用程序的状态
             if (lstboxIsShow && (Form5.myPtr.ToInt32() != OmyPtr.ToInt32()))
             {
                 form5.Hide();
                 lstboxIsShow = false;
-                //Console.WriteLine("HIDE");
+                Console.WriteLine("HIDE");
 
             }
             //lstboxIsShow = false;
@@ -530,7 +529,7 @@ namespace ATCommandTool
             {
                 string nowDirPath = System.Windows.Forms.Application.StartupPath;
                 string dirPath = nowDirPath + "\\AtCommandTool_Logs";
-                string filePth = dirPath + "\\" + DateTime.Now.ToString("yyyyMMddHHmmmmssfff") + ".log";
+                string filePth = dirPath + "\\" + DateTime.Now.ToString("yyyyMMddhhmmmmssfff") + ".log";
                 if (!Directory.Exists(dirPath))
                 {
                     Directory.CreateDirectory(dirPath);
