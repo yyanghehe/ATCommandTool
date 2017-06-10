@@ -27,6 +27,7 @@ namespace ATCommandTool.Controlers
         bool showHEXSend = false;
         CheckBox cboxHEXReceive;//16进制发送
         bool showHEXReceive;
+        Label lblR;
         CheckBox cboxTimeShow;
         bool showTime = false;
         //控件类
@@ -53,6 +54,7 @@ namespace ATCommandTool.Controlers
             cboxDTR.Click += CboxDTR_Click;
             btnOpenOrClose = _gbox.Controls.Find("btnOpen", true)[0] as Button;
             cbboxBaud.SelectedValueChanged += CbboxBaud_SelectedValueChanged;
+            lblR = _gbox.FindForm().Controls.Find("lblR", true)[0] as Label;
             serialPort = new SerialPort();
         }
 
@@ -130,17 +132,17 @@ namespace ATCommandTool.Controlers
             catch (System.IO.IOException e)
             {
                 //Console.WriteLine("打开" + serialPort.PortName + "失败");
-                showERROR(e.Message);
+                showERROR(e.Message+"======打开串口失败");
             }
             catch (System.UnauthorizedAccessException e)
             {
                 //Console.WriteLine("打开" + serialPort.PortName + "失败");
-                showERROR(e.Message);
+                showERROR(e.Message + "======打开串口失败");
             }
             catch (System.ArgumentException e)
             {
                 //Console.WriteLine("打开" + serialPort.PortName + "失败");
-                showERROR(e.Message);
+                showERROR(e.Message + "======打开串口失败");
             }
         }
         private void CboxDTR_Click(object sender, EventArgs e)
@@ -170,49 +172,52 @@ namespace ATCommandTool.Controlers
             }
             catch (Exception e)
             {
-                showERROR(e.Message);
+                showERROR(e.Message+ " ====== 关闭串口失败");
             }
             if (myThread != null)
             {
                 //OutPutEvent.Dispose();
+                listBytes.Clear();
                 myThread.Abort();
             }
-                
+
         }
         AutoResetEvent OutPutEvent = new AutoResetEvent(false);
         AutoResetEvent ReceviceEvent = new AutoResetEvent(false);
-        List<byte[]> listBytes=new List<byte[]>();
+        List<byte[]> listBytes = new List<byte[]>();
         private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             int count = serialPort.BytesToRead;
             if (count > 0)
             {
-                try { 
-                //byte[] bufferBytes = new byte[count];
-                //serialPort.Read(bufferBytes, 0, count);
-                //PortBytes portBytes = new PortBytes(showTotBox);
-                //tBoxPortOut.FindForm().BeginInvoke(portBytes, bufferBytes);
-                countLength += count;
-                Console.WriteLine("count:" + count);
-                Console.WriteLine("CountLength:" + countLength);
-                byte[] bufferBytes = new byte[count];
-                serialPort.Read(bufferBytes, 0, count);
-                listBytes.Add(bufferBytes);
+                try
+                {
+                    //byte[] bufferBytes = new byte[count];
+                    //serialPort.Read(bufferBytes, 0, count);
+                    //PortBytes portBytes = new PortBytes(showTotBox);
+                    //tBoxPortOut.FindForm().BeginInvoke(portBytes, bufferBytes);
+                    countLength += count;
+                    Console.WriteLine("count:" + count);
+                    Console.WriteLine("CountLength:" + countLength);
+                    byte[] bufferBytes = new byte[count];
+                    serialPort.Read(bufferBytes, 0, count);
+                    listBytes.Add(bufferBytes);
                     //OutPutEvent.Set();
                     //ReceviceEvent.Set();
                     //Thread showThread = new Thread(new ParameterizedThreadStart(dobufferBytes));
                     //showThread.Start(bufferBytes);
                 }
-                catch(Exception E)
+                catch (Exception E)
                 {
                     ERRORDelegate mySend = new ERRORDelegate(showERROR);
-                    _gbox.FindForm().BeginInvoke(mySend, E.Message);
+                    _gbox.FindForm().BeginInvoke(mySend, E.Message + "======接受数据错误");
                 }
             }
         }
         double countLength = 0;
         //private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         //{
+        //    ReceviceEvent.WaitOne();
         //    int count = serialPort.BytesToRead;
         //    if (count > 0)
         //    {
@@ -221,8 +226,8 @@ namespace ATCommandTool.Controlers
         //        Console.WriteLine("CountLength:" + countLength);
         //        byte[] bufferBytes = new byte[count];
         //        serialPort.Read(bufferBytes, 0, count);
-        //        //PortBytes portBytes = new PortBytes(showTotBox);
-        //        //tBoxPortOut.FindForm().BeginInvoke(portBytes, bufferBytes);
+        //        PortBytes portBytes = new PortBytes(showTotBox);
+        //        tBoxPortOut.FindForm().BeginInvoke(portBytes, bufferBytes);
         //        //Thread showThread = new Thread(new ParameterizedThreadStart(dobufferBytes));
         //        //showThread.Start(bufferBytes);
         //    }
@@ -253,8 +258,8 @@ namespace ATCommandTool.Controlers
             while (true)
             {
                 Application.DoEvents();
-                
-                if (listBytes.Count>0)
+
+                if (listBytes.Count > 0)
                 {
                     PortBytes portBytes = new PortBytes(show);
                     tBoxPortOut.FindForm().BeginInvoke(portBytes, listBytes[0]);
@@ -262,9 +267,10 @@ namespace ATCommandTool.Controlers
                 }
                 else
                 {
+                    Thread.Sleep(200);
                     continue;
                 }
-                
+
             }
         }
         private void show(byte[] bytes)
@@ -278,18 +284,20 @@ namespace ATCommandTool.Controlers
                 {
                     str += b.ToString("X2") + " ";
                 }
-                
+
             }
             else
             {
                 str = Encoding.Default.GetString(bytes).Replace("\0", "\\0");
             }
             bytes = new byte[str.Length];
-            bytes=(Encoding.Default.GetBytes(str));
+            bytes = (Encoding.Default.GetBytes(str));
             loopPrint(bytes);
             //saveAtLog(Encoding.Default.GetString(bytes).Replace("\0", "\\0"));
-            listBytes.RemoveAt(0);
+            if (listBytes.Count>0)
+                listBytes.RemoveAt(0);
             OutPutEvent.Set();
+            //ReceviceEvent.Set();
         }
         private void saveAtLog(string str)
         {
@@ -317,47 +325,50 @@ namespace ATCommandTool.Controlers
         }
         void loopPrint(byte[] bytes)
         {
+            long MaxLength = 1269 * 3;
             if (showTime)
             {
                 tBoxPortOut.AppendText("\r\n" + NowTime() + "收<===\r\n");
             }
-            if (bytes.Length>=0)
+            if (bytes.Length >= 0)
             {
-                if (bytes.Length > 1024)
+                if (bytes.Length > MaxLength)
                 {
-                    Console.WriteLine("长度大于1269=============此时长度为:" + bytes.Length);
-                    for (int i = 0; i <= bytes.Length / 1269; i++)
+                    Console.WriteLine("长度大于" + MaxLength + "=============此时长度为:" + bytes.Length);
+                    for (int i = 0; i <= bytes.Length / MaxLength; i++)
                     {
                         Application.DoEvents();
                         byte[] temp;
-                        if (i != bytes.Length / 1269)
+                        if (i != bytes.Length / MaxLength)
                         {
-                            temp = new byte[1269];
-                            Array.Copy(bytes, i * 1269, temp,0, 1269);
+                            temp = new byte[MaxLength];
+                            Array.Copy(bytes, i * MaxLength, temp, 0, MaxLength);
                         }
                         else
                         {
-                            temp = new byte[bytes.Length - i * 1269];
-                            Array.Copy(bytes, i * 1269, temp, 0, temp.Length);
+                            temp = new byte[bytes.Length - i * MaxLength];
+                            Array.Copy(bytes, i * MaxLength, temp, 0, temp.Length);
                         }
-                        tBoxPortOut.AppendText(Encoding.Default.GetString(temp));
-                        Label lblR = _gbox.FindForm().Controls.Find("lblR", true)[0] as Label;
-                        lblR.Text = "R:" + (int.Parse(lblR.Text.Substring(2)) + (!showHEXReceive ? temp.Length : temp.Length / 3));
+                        showBytes(temp);
                     }
                 }
                 else
                 {
-                    tBoxPortOut.AppendText(Encoding.Default.GetString(bytes));
-                    Label lblR = _gbox.FindForm().Controls.Find("lblR", true)[0] as Label;
-                    lblR.Text = "R:" + (int.Parse(lblR.Text.Substring(2)) + (!showHEXReceive ? bytes.Length : bytes.Length / 3));
+                    showBytes(bytes);
                 }
             }
         }
-
+        void showBytes(byte[] bytes)
+        {
+            if (this.isOpen())
+            {
+                tBoxPortOut.AppendText(Encoding.Default.GetString(bytes));
+                lblR.Text = "R:" + (int.Parse(lblR.Text.Substring(2)) + (!showHEXReceive ? bytes.Length : bytes.Length / 3));
+            }
+        }
         private void showERROR(string str)
         {
             tBoxPortOut.AppendText(str);
-            Label lblR = _gbox.FindForm().Controls.Find("lblR", true)[0] as Label;
         }
         public string[] refurbishPortNme()
         {
@@ -387,7 +398,7 @@ namespace ATCommandTool.Controlers
             }
             catch (Exception E)
             {
-                showERROR(E.Message);
+                showERROR(E.Message+"======刷新串口失败");
                 return portNames;
             }
             //方法二
@@ -455,7 +466,7 @@ namespace ATCommandTool.Controlers
             }
             catch (Exception e)
             {
-                showERROR(e.Message);
+                showERROR(e.Message + "======发送数据失败");
             }
         }
 
@@ -469,7 +480,7 @@ namespace ATCommandTool.Controlers
             catch (Exception e)
             {
                 ERRORDelegate mySend = new ERRORDelegate(showERROR);
-                _gbox.FindForm().BeginInvoke(mySend, e.Message);
+                _gbox.FindForm().BeginInvoke(mySend, e.Message + "======发送数据失败");
             }
         }
 
