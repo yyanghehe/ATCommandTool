@@ -132,7 +132,7 @@ namespace ATCommandTool.Controlers
             catch (System.IO.IOException e)
             {
                 //Console.WriteLine("打开" + serialPort.PortName + "失败");
-                showERROR(e.Message+"======打开串口失败");
+                showERROR(e.Message + "======打开串口失败");
             }
             catch (System.UnauthorizedAccessException e)
             {
@@ -172,7 +172,7 @@ namespace ATCommandTool.Controlers
             }
             catch (Exception e)
             {
-                showERROR(e.Message+ " ====== 关闭串口失败");
+                showERROR(e.Message + " ====== 关闭串口失败");
             }
             if (myThread != null)
             {
@@ -196,12 +196,14 @@ namespace ATCommandTool.Controlers
                     //serialPort.Read(bufferBytes, 0, count);
                     //PortBytes portBytes = new PortBytes(showTotBox);
                     //tBoxPortOut.FindForm().BeginInvoke(portBytes, bufferBytes);
+
                     countLength += count;
                     Console.WriteLine("count:" + count);
                     Console.WriteLine("CountLength:" + countLength);
                     byte[] bufferBytes = new byte[count];
                     serialPort.Read(bufferBytes, 0, count);
-                    listBytes.Add(bufferBytes);
+                    listBytesAddOrRemove(true, bufferBytes);
+                    //listBytes.Add(bufferBytes);
                     //OutPutEvent.Set();
                     //ReceviceEvent.Set();
                     //Thread showThread = new Thread(new ParameterizedThreadStart(dobufferBytes));
@@ -267,10 +269,25 @@ namespace ATCommandTool.Controlers
                 }
                 else
                 {
-                    Thread.Sleep(200);
                     continue;
                 }
 
+            }
+        }
+        void listBytesAddOrRemove(bool isAdd, byte[] bytes)
+        {
+            lock (listBytes)
+            {
+                if (isAdd)
+                {
+                    Console.WriteLine("+++++++++++++");
+                    listBytes.Add(bytes);
+                }
+                else
+                {
+                    Console.WriteLine("--------------");
+                    listBytes.RemoveAt(0);
+                }
             }
         }
         private void show(byte[] bytes)
@@ -294,8 +311,8 @@ namespace ATCommandTool.Controlers
             bytes = (Encoding.Default.GetBytes(str));
             loopPrint(bytes);
             //saveAtLog(Encoding.Default.GetString(bytes).Replace("\0", "\\0"));
-            if (listBytes.Count>0)
-                listBytes.RemoveAt(0);
+            if (listBytes.Count > 0)
+                listBytesAddOrRemove(false, bytes);
             OutPutEvent.Set();
             //ReceviceEvent.Set();
         }
@@ -398,7 +415,7 @@ namespace ATCommandTool.Controlers
             }
             catch (Exception E)
             {
-                showERROR(E.Message+"======刷新串口失败");
+                showERROR(E.Message + "======刷新串口失败");
                 return portNames;
             }
             //方法二
