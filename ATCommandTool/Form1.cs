@@ -31,6 +31,7 @@ namespace ATCommandTool
             lstBoxRe.KeyPress += LstBoxRe_KeyPress;
             lstBoxRe.KeyDown += LstBoxRe_KeyDown;
             lstBoxRe.DoubleClick += LstBoxRe_DoubleClick;
+            SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
         }
 
 
