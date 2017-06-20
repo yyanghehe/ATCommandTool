@@ -17,6 +17,8 @@ namespace ATCommandTool
         PortControl portControl;
         Form5 form5 = new Form5();
         ListBox lstBoxRe;
+        int thisX;
+        int thisY;
         public Form1()
         {
             InitializeComponent();
@@ -32,6 +34,8 @@ namespace ATCommandTool
             lstBoxRe.KeyDown += LstBoxRe_KeyDown;
             lstBoxRe.DoubleClick += LstBoxRe_DoubleClick;
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
+            thisX = Size.Width;
+            thisY = Size.Height;
         }
 
 
@@ -552,6 +556,29 @@ namespace ATCommandTool
         private void RightClik_S_Click(object sender, EventArgs e)
         {
             saveAtLog();
+        }
+
+        private void Form1_Resize(object sender, EventArgs e)
+        {
+            Console.WriteLine("change" + (this.Size.Height - this.tboxShow.Size.Height));
+            int changY = Size.Height - thisY;
+            int changX = Size.Width - thisX;
+            tboxShow.SetBounds(tboxShow.Left, tboxShow.Right, tboxShow.Height, 351 + Size.Height - thisY);
+            panel1.Height = 327 + Size.Height - thisY;
+            gboxMCL.Height= 366 + Size.Height - thisY;
+            gboxSend.Width = 539 + changX;
+            tboxSend.Width = 424 + changX;
+            //btnSend.Location = new Point(btnSend.Location.X + changX, btnSend.Location.Y);
+        }
+
+        private void Form1_ResizeBegin(object sender, EventArgs e)
+        {
+            Console.WriteLine("begin");
+        }
+
+        private void Form1_ResizeEnd(object sender, EventArgs e)
+        {
+            Console.WriteLine("end");
         }
 
 

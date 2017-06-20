@@ -114,9 +114,10 @@
             // 
             this.gboxMCPD.Controls.Add(this.btnMCPDRead);
             this.gboxMCPD.Controls.Add(this.btnMCPDSave);
-            this.gboxMCPD.Location = new System.Drawing.Point(7, 453);
+            this.gboxMCPD.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.gboxMCPD.Location = new System.Drawing.Point(3, 462);
             this.gboxMCPD.Name = "gboxMCPD";
-            this.gboxMCPD.Size = new System.Drawing.Size(328, 47);
+            this.gboxMCPD.Size = new System.Drawing.Size(344, 47);
             this.gboxMCPD.TabIndex = 4;
             this.gboxMCPD.TabStop = false;
             this.gboxMCPD.Text = "数据操作";
@@ -147,7 +148,7 @@
             this.gboxMCL.Controls.Add(this.label5);
             this.gboxMCL.Location = new System.Drawing.Point(7, 90);
             this.gboxMCL.Name = "gboxMCL";
-            this.gboxMCL.Size = new System.Drawing.Size(328, 353);
+            this.gboxMCL.Size = new System.Drawing.Size(328, 366);
             this.gboxMCL.TabIndex = 3;
             this.gboxMCL.TabStop = false;
             this.gboxMCL.Text = "多条指令";
@@ -168,7 +169,7 @@
             this.panel1.AutoScroll = true;
             this.panel1.Location = new System.Drawing.Point(5, 33);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(317, 309);
+            this.panel1.Size = new System.Drawing.Size(317, 327);
             this.panel1.TabIndex = 0;
             // 
             // label6
@@ -338,10 +339,10 @@
             // 
             this.gboxPort.Controls.Add(this.gboxPortControl);
             this.gboxPort.Controls.Add(this.tboxShow);
-            this.gboxPort.Dock = System.Windows.Forms.DockStyle.Left;
+            this.gboxPort.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gboxPort.Location = new System.Drawing.Point(0, 0);
             this.gboxPort.Name = "gboxPort";
-            this.gboxPort.Size = new System.Drawing.Size(550, 512);
+            this.gboxPort.Size = new System.Drawing.Size(554, 512);
             this.gboxPort.TabIndex = 1;
             this.gboxPort.TabStop = false;
             // 
@@ -354,7 +355,7 @@
             this.gboxPortControl.Margin = new System.Windows.Forms.Padding(0);
             this.gboxPortControl.Name = "gboxPortControl";
             this.gboxPortControl.Padding = new System.Windows.Forms.Padding(0);
-            this.gboxPortControl.Size = new System.Drawing.Size(544, 138);
+            this.gboxPortControl.Size = new System.Drawing.Size(548, 138);
             this.gboxPortControl.TabIndex = 1;
             this.gboxPortControl.TabStop = false;
             // 
@@ -569,14 +570,15 @@
             // 
             this.gboxSend.Controls.Add(this.btnSend);
             this.gboxSend.Controls.Add(this.tboxSend);
-            this.gboxSend.Location = new System.Drawing.Point(3, 82);
+            this.gboxSend.Location = new System.Drawing.Point(3, 87);
             this.gboxSend.Name = "gboxSend";
-            this.gboxSend.Size = new System.Drawing.Size(538, 51);
+            this.gboxSend.Size = new System.Drawing.Size(538, 42);
             this.gboxSend.TabIndex = 6;
             this.gboxSend.TabStop = false;
             // 
             // btnSend
             // 
+            this.btnSend.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnSend.Location = new System.Drawing.Point(446, 13);
             this.btnSend.Name = "btnSend";
             this.btnSend.Size = new System.Drawing.Size(82, 23);
@@ -587,6 +589,8 @@
             // 
             // tboxSend
             // 
+            this.tboxSend.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.tboxSend.Location = new System.Drawing.Point(6, 15);
             this.tboxSend.Name = "tboxSend";
             this.tboxSend.Size = new System.Drawing.Size(434, 21);
@@ -605,7 +609,7 @@
             this.tboxShow.Name = "tboxShow";
             this.tboxShow.ReadOnly = true;
             this.tboxShow.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.tboxShow.Size = new System.Drawing.Size(544, 351);
+            this.tboxShow.Size = new System.Drawing.Size(548, 351);
             this.tboxShow.TabIndex = 0;
             this.tboxShow.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tboxShow_KeyPress);
             // 
@@ -665,19 +669,20 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(904, 512);
             this.Controls.Add(this.gboxPort);
             this.Controls.Add(this.gboxMCCS);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
-            this.MaximizeBox = false;
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "串口工具V2.8_Test_5";
+            this.Text = "串口工具V2.8_Test_6";
             this.Deactivate += new System.EventHandler(this.Form1_Deactivate);
+            this.ResizeBegin += new System.EventHandler(this.Form1_ResizeBegin);
+            this.ResizeEnd += new System.EventHandler(this.Form1_ResizeEnd);
             this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Form1_KeyPress);
             this.Move += new System.EventHandler(this.Form1_Move);
+            this.Resize += new System.EventHandler(this.Form1_Resize);
             this.gboxMCCS.ResumeLayout(false);
             this.gboxMCPD.ResumeLayout(false);
             this.gboxMCL.ResumeLayout(false);

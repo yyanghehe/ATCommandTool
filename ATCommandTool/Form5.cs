@@ -18,6 +18,7 @@ namespace ATCommandTool
             InitializeComponent();
             listBox1.ItemHeight = 20;
             myPtr = GetForegroundWindow();
+            SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
         }
         [DllImport("user32.dll")]
         private static extern IntPtr GetForegroundWindow();
