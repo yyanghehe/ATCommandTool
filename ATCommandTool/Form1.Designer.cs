@@ -589,8 +589,6 @@
             // 
             // tboxSend
             // 
-            this.tboxSend.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
             this.tboxSend.Location = new System.Drawing.Point(6, 15);
             this.tboxSend.Name = "tboxSend";
             this.tboxSend.Size = new System.Drawing.Size(434, 21);
@@ -676,7 +674,7 @@
             this.KeyPreview = true;
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "串口工具V2.8_Test_6";
+            this.Text = "串口工具V2.9";
             this.Deactivate += new System.EventHandler(this.Form1_Deactivate);
             this.ResizeBegin += new System.EventHandler(this.Form1_ResizeBegin);
             this.ResizeEnd += new System.EventHandler(this.Form1_ResizeEnd);

@@ -472,18 +472,24 @@ namespace ATCommandTool
         /// </summary>
         private void setListFromLocation()
         {
-            Point point = new Point(tboxSend.Location.X + tboxSend.Parent.Location.X + this.Location.X + 10,
-                tboxSend.Location.Y + gboxSend.Location.Y + gboxPort.Location.Y + 371 + this.Location.Y + 50);
+            // Point point = new Point(tboxSend.Location.X + tboxSend.Parent.Location.X + this.Location.X + 10,
+            //tboxSend.Location.Y + gboxSend.Location.Y + gboxPort.Location.Y + 371 + this.Location.Y + 50);
+            Point tboxScreenLoc = PointToScreen(tboxSend.Location);
+            Point formScreenLoc = this. Location;
+            Point point = new Point(tboxScreenLoc.X+5, tboxScreenLoc.Y+this.Size.Height-70);
+            Console.WriteLine("X:"+ formScreenLoc.X);
+            Console.WriteLine("Y:"+ this.Height);
             System.Drawing.Rectangle rec = Screen.GetWorkingArea(this);
             int SH = rec.Height;
             int SW = rec.Width;
-            if (point.Y + form5.Height > SH)
-            {
-                point.Y = point.Y - form5.Height - 30;
-            }
+            //if (point.Y + form5.Height > SH)
+            //{
+                //point.Y = point.Y - form5.Height - 30;
+            //}
             form5.Location = point;
             form5.Height = form5.listBox1.ItemHeight * form5.listBox1.Items.Count + 6;
             form5.Width = tboxSend.Width;
+            form5.listBox1.Width = tboxSend.Width;
         }
         private void Form1_Move(object sender, EventArgs e)
         {
@@ -568,7 +574,7 @@ namespace ATCommandTool
             gboxMCL.Height= 366 + Size.Height - thisY;
             gboxSend.Width = 539 + changX;
             tboxSend.Width = 424 + changX;
-            //btnSend.Location = new Point(btnSend.Location.X + changX, btnSend.Location.Y);
+            setListFromLocation();
         }
 
         private void Form1_ResizeBegin(object sender, EventArgs e)
