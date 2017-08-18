@@ -293,6 +293,7 @@ namespace ATCommandTool.Controlers
         private void show(byte[] bytes)
         {
             //Console.WriteLine("SHOW_LENGTH:" + bytes.Length);
+
             if (showHEXReceive)
             {
                 byte[] HEXbytes = bytes;
@@ -304,7 +305,16 @@ namespace ATCommandTool.Controlers
                 bytes = new byte[str.Length];
                 bytes = Encoding.Default.GetBytes(str);
             }
-            loopPrint(bytes);
+            try
+            {
+                loopPrint(bytes);
+            }
+            catch (Exception e)
+            {
+                saveAtLog(e.Message + "\r\nbytes:" + bytes.Length + "\r\n");
+                closePort();
+                MessageBox.Show("ERROR");
+            }
             if (listBytes.Count > 0)
                 listBytesAddOrRemove(false, bytes);
             OutPutEvent.Set();
@@ -317,7 +327,7 @@ namespace ATCommandTool.Controlers
             {
                 string nowDirPath = System.Windows.Forms.Application.StartupPath;
                 string dirPath = nowDirPath + "\\AtCommandTool_Logs";
-                string filePth = dirPath + "\\" + DateTime.Now.ToString("revevice") + ".log";
+                string filePth = dirPath + "\\" + DateTime.Now.ToString("revevice") + "ERROR.log";
                 if (!Directory.Exists(dirPath))
                 {
                     Directory.CreateDirectory(dirPath);
@@ -377,7 +387,7 @@ namespace ATCommandTool.Controlers
                     string[] strs = showStr.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
                     foreach (string Temp in strs)
                     {
-                        tBoxPortOut.AppendText(nowTime + "\t" + Temp+"\r\n");
+                        tBoxPortOut.AppendText(nowTime + "\t" + Temp + "\r\n");
                     }
                 }
                 else
@@ -476,7 +486,7 @@ namespace ATCommandTool.Controlers
             {
                 if (showTime)
                 {
-                    tBoxPortOut.AppendText("[" + NowTime() + "]===>\t" + ASCIIEncoding.Default.GetString(bytes).Replace("\r\n","")+"\r\n");
+                    tBoxPortOut.AppendText("[" + NowTime() + "]===>\t" + ASCIIEncoding.Default.GetString(bytes).Replace("\r\n", "") + "\r\n");
                 }
                 ParameterizedThreadStart parameterThread = new ParameterizedThreadStart(threadSend);
                 Thread thread = new Thread(parameterThread);

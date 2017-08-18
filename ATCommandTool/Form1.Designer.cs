@@ -676,8 +676,6 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "串口工具V2.9";
             this.Deactivate += new System.EventHandler(this.Form1_Deactivate);
-            this.ResizeBegin += new System.EventHandler(this.Form1_ResizeBegin);
-            this.ResizeEnd += new System.EventHandler(this.Form1_ResizeEnd);
             this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Form1_KeyPress);
             this.Move += new System.EventHandler(this.Form1_Move);
             this.Resize += new System.EventHandler(this.Form1_Resize);

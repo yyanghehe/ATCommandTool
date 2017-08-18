@@ -148,6 +148,7 @@ namespace ATCommandTool
                         {
                             return;
                         }
+                        Thread.Sleep(1);
                     }
                 }
             }
@@ -575,16 +576,6 @@ namespace ATCommandTool
             gboxSend.Width = 539 + changX;
             tboxSend.Width = 424 + changX;
             setListFromLocation();
-        }
-
-        private void Form1_ResizeBegin(object sender, EventArgs e)
-        {
-            Console.WriteLine("begin");
-        }
-
-        private void Form1_ResizeEnd(object sender, EventArgs e)
-        {
-            Console.WriteLine("end");
         }
 
 
